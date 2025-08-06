@@ -1,24 +1,46 @@
 {
   "name": "straydog-js",
   "version": "1.0.0",
-  "description": "Monitor your API",
+  "description": "Drop-in API monitoring for any Node.js backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf dist",
+    "test": "node test/index.js"
   },
   "keywords": [
-    "Monitoring",
-    "API"
+    "monitoring",
+    "api-monitor",
+    "nodejs",
+    "express",
+    "nestjs",
+    "fastify",
+    "devtools",
+    "observability"
   ],
-  "author": "SheronJude",
+  "author": "Sheron Jude",
   "license": "MIT",
-  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sheron184/straydog-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sheron184/straydog-js/issues"
+  },
+  "homepage": "https://github.com/sheron184/straydog-js#readme",
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/node": "^22.15.17",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
   }
 }
