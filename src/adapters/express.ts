@@ -1,12 +1,25 @@
 import { Application, Request, Response } from "express";
+import { appHandler } from "../system/handlers/handler.express";
 
 export class ExpressAdapter {
-	constructor(app: Application){
-		app.use((req: Request, res: Response) => {
+	public app: Application | null;
+
+	constructor() {
+		this.app = null;
+	}
+
+	monitor(app: Application) {
+		this.app = app;
+		appHandler(app)
+		
+		app.use((req: Request, res: Response, next) => {
 			// Verify is app express
-			// Init request perf details
+			// Init app details (paths, name, etc..)
 			// Get request data 
+			console.log('express app recevied!');
+			next();
 		});
 	}
 }
 
+ 
