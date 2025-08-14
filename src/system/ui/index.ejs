@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monitoring Dashboard</title>
+</head>
+<body>
+  <h1>API Monitoring Dashboard</h1>
+  <p>Uptime: <%= metrics.uptime %> seconds</p>
+  <p>Memory Usage: <%= (metrics.memory.rss / 1024 / 1024).toFixed(2) %> MB</p>
+
+  <h2>Requests</h2>
+  <ul>
+    <% requests.forEach(r => { %>
+      <li><%= r.method %> <%= r.path %> - <%= r.start_time %>ms</li>
+    <% }) %>
+  </ul>
+</body>
+</html>
