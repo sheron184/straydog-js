@@ -1,18 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Monitoring Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring Dashboard</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #1e1e2f;
+    color: #e0e0e0;
+    padding: 20px;
+  }
+
+  h1 { color: #00d8ff; }
+  h2 { margin-top: 30px; }
+  h3 { color: #ffa500; margin-top: 20px; }
+
+  .metrics { display: flex; gap: 20px; margin-bottom: 20px; }
+  .metric {
+    background: #2c2c3e;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { padding: 10px; text-align: left; }
+  th { background-color: #3a3a4f; color: #00d8ff; }
+
+  tr.normal { background-color: #2c2c3e; }
+  tr.normal:nth-child(even) { background-color: #34344f; }
+  tr.error { background-color: #8b1c1c; color: #fff; }
+
+  .latency {
+    font-weight: bold;
+    color: #00ff99;
+  }
+
+  .details {
+    display: none;
+    background: #1c1c2e;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+
+  .toggle-btn {
+    cursor: pointer;
+    color: #00d8ff;
+    text-decoration: underline;
+  }
+
+  .success-count { color: #00ff99; font-weight: bold; }
+  .fail-count { color: #ff3333; font-weight: bold; }
+</style>
 </head>
 <body>
-  <h1>API Monitoring Dashboard</h1>
-  <p>Uptime: <%= metrics.uptime %> seconds</p>
-  <p>Memory Usage: <%= (metrics.memory.rss / 1024 / 1024).toFixed(2) %> MB</p>
 
-  <h2>Requests</h2>
-  <ul>
-    <% requests.forEach(r => { %>
-      <li><%= r.method %> <%= r.path %> - <%= r.start_time %>ms</li>
-    <% }) %>
-  </ul>
+<h1>API Monitoring Dashboard</h1>
+
+<div class="metrics">
+  <div class="metric">Uptime: <%= metrics.uptime %>s</div>
+  <div class="metric">Memory: <%= (metrics.memory.rss / 1024 / 1024).toFixed(2) %> MB</div>
+</div>
+
+<h2>Requests (Grouped by Path)</h2>
+
+<%
+  // Group requests by path
+  const grouped = {};
+  requests.forEach(r => {
+    if (!grouped[r.path]) grouped[r.path] = [];
+    grouped[r.path].push(r);
+  });
+%>
+
+<% Object.keys(grouped).forEach(path => { 
+     const totalSuccess = grouped[path].filter(r => !r.error && r.status_code < 400).length;
+     const totalFail = grouped[path].filter(r => r.error || r.status_code >= 400).length;
+%>
+  <h3>
+    <%= path %> 
+    (<span class="success-count"><%= totalSuccess %> ✓</span>, 
+     <span class="fail-count"><%= totalFail %> ✗</span>)
+  </h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Status</th>
+        <th>Latency (ms)</th>
+        <th>Error</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% grouped[path].forEach(r => { %>
+        <tr class="<%= r.error ? 'error' : 'normal' %>">
+          <td><%= r.method %></td>
+          <td><%= r.status_code %></td>
+          <td class="latency"><%= r.latency?.toFixed(2) || '-' %></td>
+          <td><%= r.error || '-' %></td>
+          <td>
+            <% if (r.error || r.body || r.headers || r.query) { %>
+              <span class="toggle-btn" onclick="toggleDetails('details-<%= r.request_id %>')">Show</span>
+              <div id="details-<%= r.request_id %>" class="details">
+                <%= JSON.stringify({ headers: r.headers, query: r.query, body: r.body, error_stack: r.error_stack }, null, 2) %>
+              </div>
+            <% } else { %> - <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% }) %>
+
+<script>
+function toggleDetails(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+
 </body>
 </html>

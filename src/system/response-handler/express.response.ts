@@ -6,12 +6,14 @@ export class ExpressResponseHandler {
 	private responseModel: ResponseModel;
 	private latency: number;
 	private requestId: number;
+	private error: any;
 
-	constructor(res: Response, latency: number, requestId: number) {
+	constructor(res: Response, err: any, latency: number, requestId: number) {
 		this.response = res;
 		this.responseModel = new ResponseModel('response');
 		this.latency = latency;
 		this.requestId = requestId;
+		this.error = err;
 	}
 
 	save(): number {
@@ -19,8 +21,15 @@ export class ExpressResponseHandler {
 			latency: this.latency,
 			end_time: (new Date()).toISOString(),
 			status_code: this.response.statusCode,
-			request_id: this.requestId
+			request_id: this.requestId,
+			error: null,
+			error_stack: null
 		}
+		if(this.error){
+			data.error = this.error.message;
+			data.error_stack = this.error.stack;
+		}
+		console.log(this.error);
 		return this.responseModel.insert(data);
 	}
 
