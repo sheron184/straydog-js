@@ -4,12 +4,15 @@ import { ExpressAppHandler } from "../system/app-handler/express.handler";
 import { ExpressRequestHandler } from "../system/request-handler/express.request";
 import { ExpressResponseHandler } from "../system/response-handler/express.response";
 import { iRequestObserve } from "../types/request.types";
+import { Api } from "../system/api/api";
 
 export class ExpressAdapter {
 	public app: Application;
+	public api: Api;
 
 	constructor(app: Application) {
 		this.app = app;
+		this.api = new Api();
 	}
 
 	observe(options?: iRequestObserve) {

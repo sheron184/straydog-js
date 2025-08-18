@@ -1,6 +1,6 @@
 {
   "name": "straydog-js",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.0",
   "description": "Drop-in API monitoring for any Node.js backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,6 +48,7 @@
   "dependencies": {
     "better-sqlite3": "^12.2.0",
     "ejs": "^3.1.10",
+    "eta": "^3.5.0",
     "express": "^5.1.0"
   }
 }
