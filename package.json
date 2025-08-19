@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc & npm run copy-views",
     "dev": "tsc --watch",
-    "copy-views": "cpx \"src/system/ui/**/*\" dist/system/ui",
+    "copy-views": "cpx \"ui/dist/**/*\" dist/system/ui",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf dist",
     "test": "node test/index.js"
