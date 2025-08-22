@@ -7,7 +7,6 @@ export class BaseModel {
 
   constructor(table: string) {
     const dbPath = path.resolve(__dirname, 'db.sqlite3');
-    console.log(dbPath)
     this.db = new Database(dbPath);
     this._table = table; 
   }
@@ -128,5 +127,49 @@ export class BaseModel {
     const sql = `SELECT * FROM "${this._table}" WHERE ${whereClause}`;
     const stmt: Statement = this.db.prepare(sql);
     return stmt.all(...whereValues) as T[];
+  }
+
+  /**
+ * Get records from the last N days based on a date column
+ * @param dateColumn - the column name that contains the date/datetime
+ * @param days - number of days to look back
+ * @param additionalWhere - optional additional where conditions
+ * @param orderBy - optional order by column (defaults to dateColumn DESC)
+ */
+  getLastNDays<T = Record<string, any>>(
+    dateColumn: string, 
+    days: number, 
+    additionalWhere?: Record<string, any>,
+    orderBy?: string
+  ): T[] {
+    if (!this._table) throw new Error('Table name is not set.');
+    if (days < 0) throw new Error('Days must be a positive number.');
+
+    // Calculate cutoff date
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    cutoffDate.setHours(0, 0, 0, 0); // Start of day for more predictable results
+  
+    // For SQLite, we need to format the date properly
+    const cutoffDateStr = cutoffDate.toISOString();
+
+    let whereClause = `"${dateColumn}" >= ?`;
+    let values: any[] = [cutoffDateStr];
+
+    // Add additional where conditions if provided
+    if (additionalWhere && Object.keys(additionalWhere).length > 0) {
+      const additionalCols = Object.keys(additionalWhere);
+      const additionalClause = additionalCols.map(col => `"${col}" = ?`).join(' AND ');
+      whereClause += ` AND ${additionalClause}`;
+      values.push(...Object.values(additionalWhere));
+    }
+
+    // Add ORDER BY clause
+    const orderByClause = orderBy || `"${dateColumn}" DESC`;
+
+    const sql = `SELECT * FROM "${this._table}" WHERE ${whereClause} ORDER BY ${orderByClause}`;
+  
+    const stmt: Statement = this.db.prepare(sql);
+    return stmt.all(...values) as T[];
   }
 }

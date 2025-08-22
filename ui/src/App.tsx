@@ -7,16 +7,17 @@ import { LogPage } from './pages/log';
 
 function App() {
   const query = useQueryParams();
+  let PageComponent;
 
-  const PageComponent = () => {
-    switch (query.page) {
-      case 'home':
-        return <HomePage />;
-      case 'log':
-        return <LogPage />;
-      default:
-        return <HomePage />;
-    }
+  switch (query.page) {
+    case 'home':
+      PageComponent = HomePage;
+      break;
+    case 'log':
+      PageComponent = LogPage;
+      break;
+    default:
+      PageComponent = HomePage;
   }
 
   return (

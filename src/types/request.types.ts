@@ -1,3 +1,7 @@
-export interface iRequestObserve {
+export interface iOptions {
 	exclude: string[]
+}
+
+export interface LogRequest {
+	
 }

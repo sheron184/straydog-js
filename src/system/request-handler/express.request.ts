@@ -1,13 +1,23 @@
 import { Request } from "express";
 import { RequestModel } from "../../config/data/request.model";
+import { iOptions } from "../../types/request.types";
 
 export class ExpressRequestHandler {
 	private request: Request;
 	private requestModel: RequestModel;
+	private options: iOptions;
+	public excluded: boolean = false;
 
-	constructor(req: Request) {
+	constructor(req: Request, options: iOptions) {
 		this.request = req;
 		this.requestModel = new RequestModel('request');
+		this.options = options;
+
+		this.excluded = this.checkIfExcluded();
+	}
+
+	checkIfExcluded() : boolean {
+		return this.options.exclude.includes(this.getPath());
 	}
 
 	save(): number {
