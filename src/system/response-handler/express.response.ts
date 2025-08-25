@@ -29,7 +29,6 @@ export class ExpressResponseHandler {
 			data.error = this.error.message;
 			data.error_stack = this.error.stack;
 		}
-		console.log(this.error);
 		return this.responseModel.insert(data);
 	}
 

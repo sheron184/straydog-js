@@ -1,19 +1,20 @@
-import './App.css';
-import Layout from './layout';
-import { useQueryParams } from './hooks/use-query';
+import React, { Suspense } from "react";
+import Layout from "./layout";
+import { useQueryParams } from "./hooks/use-query";
+import { MainLoader } from "./components/main-loader";
 
-import { HomePage } from './pages/home';
-import { LogPage } from './pages/log';
+const HomePage = React.lazy(() => import("./pages/home"));
+const LogPage = React.lazy(() => import("./pages/log"));
 
 function App() {
   const query = useQueryParams();
-  let PageComponent;
 
+  let PageComponent;
   switch (query.page) {
-    case 'home':
+    case "home":
       PageComponent = HomePage;
       break;
-    case 'log':
+    case "log":
       PageComponent = LogPage;
       break;
     default:
@@ -22,9 +23,11 @@ function App() {
 
   return (
     <Layout>
-      <PageComponent />
+      <Suspense fallback={<MainLoader />}>
+        <PageComponent />
+      </Suspense>
     </Layout>
-  )
+  );
 }
 
 export default App;

@@ -230,7 +230,19 @@ export class Api {
 		return getMetrics();
 	}
 
-	getEndpoints(app: Application) {
-		return expressListEndpoints(app, '');
+	getEndpoints(app: Application, requests: any[] | undefined = undefined) {
+		if(!requests){
+			requests = this.getRequests();
+		}
+		let endpoints = expressListEndpoints(app, '');
+		endpoints = endpoints.filter((e) => e.path != '/straydog/api');
+		return endpoints.map((e) => {
+			return {
+				...e,
+				total: requests.filter((r) => r.path == e.path).length,
+				failed: requests.filter((r) => r.path == e.path && r.status_code >= 400).length,
+				success: requests.filter((r) => r.path == e.path && r.status_code < 400).length,
+			}
+		})
 	}
 }

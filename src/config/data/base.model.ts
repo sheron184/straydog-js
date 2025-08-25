@@ -8,10 +8,13 @@ export class BaseModel {
   constructor(table: string) {
     const dbPath = path.resolve(__dirname, 'db.sqlite3');
     this.db = new Database(dbPath);
-    this._table = table; 
+    this._table = table;
   }
 
   init() {
+    this.db.exec("DROP TABLE IF EXISTS request");
+    this.db.exec("DROP TABLE IF EXISTS request");
+
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS request (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

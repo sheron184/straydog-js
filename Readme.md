@@ -1,34 +1,50 @@
 # straydog-js
 
-**Drop-in API monitoring for any Node.js backend**
+**Drop-in API monitoring and observability for Node.js applications**
 
-straydog-js is a lightweight, zero-config monitoring solution for Node.js applications. It is designed to quickly instrument your Express (and soon NestJS, Fastify) APIs for route discovery, request tracking, and real-time observability. With a simple integration, you gain insight into your API's structure and activity without invasive code changes or heavy dependencies.
+![npm version](https://img.shields.io/npm/v/straydog-js.svg)
+![license](https://img.shields.io/npm/l/straydog-js.svg)
+![downloads](https://img.shields.io/npm/dt/straydog-js.svg)
 
----
-
-## Features
-
-- **Automatic Route Discovery**  
-  Instantly lists all API endpoints and their HTTP methods by introspecting your Express app.
-
-- **Request Monitoring (Planned)**  
-  Track incoming requests, response times, and payloads for every route.
-
-- **Dashboard (Planned)**  
-  Visual dashboard to view routes, request activity, and basic analytics.
-
-- **Minimal Setup**  
-  Integrate with a single line of code—no configuration or code changes required.
-
-- **Framework Agnostic (Express Supported, NestJS/Fastify Planned)**  
-  Works out-of-the-box with Express, with support for other Node.js frameworks coming soon.
-
-- **Open Source & Extensible**  
-  MIT-licensed and designed for easy customization.
+straydog-js is a lightweight, zero-config monitoring solution that provides real-time observability for your Node.js APIs. Track requests, monitor performance, analyze errors, and visualize your API usage through an integrated dashboard—all with a single line of code.
 
 ---
 
-## Installation
+## ✨ Features
+
+### 🔍 **Automatic Request Monitoring**
+- Track all incoming HTTP requests with detailed metadata
+- Monitor response times, status codes, and error rates
+- Capture request/response data including headers, query parameters, and payloads
+
+### 📊 **Built-in Analytics Dashboard**
+- Real-time dashboard accessible at `/straydog` 
+- Visual charts and metrics for API performance
+- Request logs with filtering and search capabilities
+- Error tracking and debugging tools
+
+### 📈 **Performance Metrics**
+- Response time analytics (average, min, max)
+- Success/failure rate monitoring  
+- Traffic analysis by endpoint
+- Identify slowest and most-used endpoints
+
+### 🚀 **Zero Configuration**
+- Drop-in integration with single line setup
+- Automatic route discovery for Express applications
+- Local SQLite database for request storage
+- No external dependencies or cloud services required
+
+### 🛡️ **Smart Filtering**
+- Exclude static files and unwanted routes
+- Configurable request filtering options
+- Built-in exclusions for development tools and assets
+
+---
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 npm install straydog-js
@@ -36,11 +52,7 @@ npm install straydog-js
 yarn add straydog-js
 ```
 
----
-
-## Quick Start
-
-Integrate straydog-js into your Express app with minimal changes:
+### Basic Usage
 
 ```typescript
 import express from 'express';
@@ -48,89 +60,267 @@ import { ExpressAdapter } from 'straydog-js';
 
 const app = express();
 
-// Instrument your app (add this line before you define routes)
-const straydog = new ExpressAdapter();
-straydog.monitor(app);
+// Initialize straydog monitoring
+const straydog = new ExpressAdapter(app);
+straydog.observe(); // Start request monitoring
 
 // Define your routes as usual
-app.get('/api/hello', (req, res) => {
-  res.send('Hello world!');
+app.get('/api/users', (req, res) => {
+  res.json({ users: [] });
 });
 
+app.post('/api/users', (req, res) => {
+  res.status(201).json({ message: 'User created' });
+});
+
+straydog.catch();   // Enable error tracking
+
 app.listen(3000, () => {
-  console.log('Server listening on port 3000');
+  console.log('Server running on port 3000');
+  console.log('📊 Straydog dashboard: http://localhost:3000/straydog');
 });
 ```
 
-After starting your server, straydog-js will automatically discover and print all available endpoints to the console. More monitoring and dashboard features are coming soon.
+### adapter.catch()
+
+The catch function must be called after you defined your routes.
+
+
+### Advanced Configuration
+
+```typescript
+import { ExpressAdapter } from 'straydog-js';
+
+const app = express();
+
+// Configure with custom options
+const straydog = new ExpressAdapter(app, {
+  exclude: ['/health', '/metrics', '/straydog/api', '/static']
+});
+
+straydog.observe();
+straydog.catch();
+```
 
 ---
 
-## API
+## 📊 Dashboard & Analytics
+
+Once integrated, straydog-js provides a comprehensive dashboard accessible at `/straydog`:
+
+### Dashboard Features
+- **Request Overview**: Real-time request count, success rates, and average response times
+- **Endpoint Analytics**: Traffic analysis for each API endpoint
+- **Error Monitoring**: Failed requests with detailed error information
+- **Performance Metrics**: Response time distributions and latency analysis
+- **Request History**: Searchable log of all API requests
+
+### API Endpoints
+The dashboard is powered by internal API endpoints:
+
+```
+GET /straydog/api?method=getRequests&days=7   # Get request logs
+GET /straydog/api?method=getStats&days=7      # Get analytics
+GET /straydog/api?method=getEndpoints         # Get route list
+GET /straydog/api?method=getErrorRequests     # Get failed requests
+```
+
+---
+
+## 🔧 API Reference
 
 ### ExpressAdapter
 
-- **monitor(app: Application): void**
-  - Instruments your Express app for route discovery and monitoring.
-  - Should be called before defining routes for full coverage.
+The main class for Express.js integration.
+
+#### Constructor
+```typescript
+new ExpressAdapter(app: Application, options?: Options)
+```
+
+**Parameters:**
+- `app` - Your Express application instance
+- `options` - Configuration options (optional)
+
+#### Options
+```typescript
+interface Options {
+  exclude: string[];  // Routes to exclude from monitoring
+}
+```
+
+**Default exclusions:**
+- `/straydog/api` - Dashboard API endpoints
+
+#### Methods
+
+##### `observe()`
+Starts monitoring incoming requests. Call this method to begin tracking API usage.
+
+```typescript
+straydog.observe();
+```
+
+##### `catch()`
+Enables error tracking for uncaught exceptions and failed requests.
+
+```typescript
+straydog.catch();
+```
 
 ---
 
-## Roadmap
+## 📋 Analytics & Metrics
 
-- [x] Express route discovery
-- [ ] Request tracking and analytics
-- [ ] Built-in dashboard UI
-- [ ] NestJS and Fastify support
-- [ ] Custom event hooks & extensions
+straydog-js automatically calculates comprehensive metrics:
+
+### Request Statistics
+- **Total Requests**: Count of all API calls
+- **Success Rate**: Percentage of successful requests (status < 400)
+- **Average Latency**: Mean response time across all requests
+- **Error Count**: Number of failed requests
+
+### Endpoint Analysis
+- **Highest Traffic**: Most frequently accessed endpoints
+- **Slowest Endpoint**: Endpoints with highest average response time
+- **Fastest Endpoint**: Most performant endpoints  
+- **Most Failed**: Endpoints with highest error rates
+
+### Performance Metrics
+- **Latency Distribution**: Min, max, and average response times
+- **System Metrics**: Memory usage, CPU usage, and uptime
+- **Time-based Analysis**: Metrics over configurable time periods (default: 7 days)
 
 ---
 
-## Development
+## 🗄️ Data Storage
 
-Clone the repo and install dependencies:
+straydog-js uses a local SQLite database to store request data:
 
+- **Location**: `src/config/data/db.sqlite3`
+- **Tables**: `request` and `response` with automatic schema creation
+- **Retention**: Configurable via API queries (default: 7 days)
+
+### Database Schema
+
+**requests table:**
+```sql
+CREATE TABLE request (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  method TEXT,
+  path TEXT, 
+  query TEXT,
+  body TEXT,
+  headers TEXT,
+  start_time DATETIME
+);
+```
+
+**responses table:**
+```sql
+CREATE TABLE response (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_id INTEGER,
+  body TEXT,
+  end_time DATETIME,
+  status_code INTEGER,
+  error TEXT,
+  latency INTEGER,
+  error_stack TEXT
+);
+```
+
+---
+
+## 🛠️ Development
+
+### Setup
 ```bash
 git clone https://github.com/sheron184/straydog-js.git
 cd straydog-js
 npm install
 ```
 
-Build the project:
-
+### Build
 ```bash
-npm run build
+npm run build        # Compile TypeScript and copy UI assets
+npm run dev          # Watch mode for development
+npm run clean        # Clean dist directory
 ```
 
-Run in dev mode (watch for changes):
-
+### Testing
 ```bash
-npm run dev
+npm test             # Run test suite
 ```
 
 ---
 
-## Contributing
+## 🗺️ Roadmap
 
-Pull requests, issues, and feature suggestions are welcome!  
-Please open an issue for bugs or new ideas.
+- [x] **Express.js Support** - Full integration with Express applications
+- [x] **Request/Response Tracking** - Complete HTTP lifecycle monitoring
+- [x] **Analytics Dashboard** - Visual metrics and request analysis
+- [x] **Error Tracking** - Automatic error capture and reporting
+- [x] **SQLite Storage** - Local database for request persistence
+
+### Upcoming Features
+- [ ] **Framework Expansion**: NestJS and Fastify support
+- [ ] **Advanced Filtering**: Custom request filtering and sampling
+- [ ] **Export Capabilities**: CSV/JSON export of analytics data
+- [ ] **Alerting System**: Configurable alerts for errors and performance
+- [ ] **Custom Dashboards**: User-defined metrics and visualizations
+- [ ] **API Rate Limiting**: Built-in rate limiting with monitoring
 
 ---
 
-## License
+## 🤝 Contributing
 
-MIT © Sheron Jude
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Guidelines
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Reporting Issues
+- Use GitHub Issues for bug reports and feature requests
+- Include detailed reproduction steps for bugs
+- Specify your Node.js and framework versions
 
 ---
 
-## Links
+## 📄 License
+
+MIT © [Sheron Jude](https://github.com/sheron184)
+
+---
+
+## 🔗 Links
 
 - [GitHub Repository](https://github.com/sheron184/straydog-js)
-- [Issues](https://github.com/sheron184/straydog-js/issues)
+- [npm Package](https://www.npmjs.com/package/straydog-js)
+- [Issues & Bug Reports](https://github.com/sheron184/straydog-js/issues)
+- [Documentation](https://github.com/sheron184/straydog-js#readme)
 
 ---
 
-## Author
+## 👨‍💻 Author
 
-Sheron Jude  
-[@sheron184](https://github.com/sheron184)
+**Sheron Jude**  
+- GitHub: [@sheron184](https://github.com/sheron184)
+- Email: [Contact via GitHub](https://github.com/sheron184)
+
+---
+
+## ⭐ Show Your Support
+
+If straydog-js helps you monitor your APIs effectively, please consider giving it a star on GitHub!
+
+```bash
+# Try it out in your next project
+npm install straydog-js
+```
+
+**Happy monitoring! 🐕‍🦺**

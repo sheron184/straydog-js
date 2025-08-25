@@ -1,6 +1,6 @@
 {
   "name": "straydog-js",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.2",
   "description": "Drop-in API monitoring for any Node.js backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sheron184/straydog-js.git"
+    "url": "git+https://github.com/sheron184/straydog-js.git"
   },
   "bugs": {
     "url": "https://github.com/sheron184/straydog-js/issues"

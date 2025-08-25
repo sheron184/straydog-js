@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { MainLoader } from '@/components/main-loader';
 import EndpointList from '@/components/endpoint-list';
 
@@ -22,7 +22,7 @@ interface StatCardData {
 
 type StatKey = keyof typeof StatTitleMap;
 
-export function HomePage() {
+export default function HomePage() {
   const params = new URLSearchParams(window.location.search);
 
   const [statCards, setStatCards] = useState<StatCardData[]>([]);
@@ -41,13 +41,14 @@ export function HomePage() {
     try {
       const promises = [
         statRequest.get({
-          method: 'getStats', 
+          method: 'getStats',
           days: timeRange
         }),
         endpointsRequest.get({
-          method: 'getEndpoints'
+          method: 'getEndpoints',
+          days: timeRange
         })];
-      const [{data}, {data : endpointsResp}] = await Promise.all(promises);
+      const [{ data }, { data: endpointsResp }] = await Promise.all(promises);
       for (const key in data) {
         // Ensure key exists in StatTitleMap
         if (key in StatTitleMap) {
@@ -56,8 +57,8 @@ export function HomePage() {
           const title = StatTitleMap[statKey].title;
           let description = '';
           let value = data[statKey] || '';
-          let unit = StatTitleMap[statKey].unit;
-          let type = StatTitleMap[statKey].type;
+          const unit = StatTitleMap[statKey].unit;
+          const type = StatTitleMap[statKey].type;
 
           if (statKey === 'fastestEndpoint' || statKey === 'slowestEndpoint') {
             if (typeof data[statKey] === 'object' && data[statKey] !== null) {
@@ -65,9 +66,9 @@ export function HomePage() {
               value = (data[statKey] as { endpoint: string }).endpoint;
             }
           }
-          if(statKey == 'highestTraffic'){
-            if(typeof data[statKey] === 'object' && data[statKey] !== null){
-              description = `Number of requests is ${(data[statKey] as {count: number}).count}`;
+          if (statKey == 'highestTraffic') {
+            if (typeof data[statKey] === 'object' && data[statKey] !== null) {
+              description = `Number of requests is ${(data[statKey] as { count: number }).count}`;
               value = (data[statKey] as { endpoint: string }).endpoint;
             }
           }
@@ -80,7 +81,7 @@ export function HomePage() {
           });
         }
       }
-      setStatCards(cards);  
+      setStatCards(cards);
       setLoading(false);
       setEndpoints(endpointsResp);
     } catch (err) {
@@ -92,7 +93,7 @@ export function HomePage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('days', timeRange);
-    window.history.replaceState({}, '', url); 
+    window.history.replaceState({}, '', url);
     init();
   }, [timeRange]);
 
